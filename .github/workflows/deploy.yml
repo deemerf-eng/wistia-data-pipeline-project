@@ -16,7 +16,7 @@ jobs:
 
     env:
       AWS_REGION: us-east-2   # change if needed
-      LAMBDA_FUNCTION_NAME: wistia-ingestion-function.py
+      LAMBDA_FUNCTION_NAME: wistia-ingestion-function
       GLUE_SCRIPT_S3_BUCKET: s3://aws-glue-assets-572318586627-us-east-2/scripts/
 
     steps:
