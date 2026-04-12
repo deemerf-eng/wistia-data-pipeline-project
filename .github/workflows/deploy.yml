@@ -16,7 +16,7 @@ jobs:
 
     env:
       AWS_REGION: us-east-2   # change if needed
-      LAMBDA_FUNCTION_NAME: wistia_ingestion_function
+      LAMBDA_FUNCTION_NAME: wistia_ingestion_function.py
       GLUE_SCRIPT_S3_BUCKET: s3://aws-glue-assets-572318586627-us-east-2/scripts/
 
     steps:
@@ -35,9 +35,9 @@ jobs:
       - name: Deploy Lambda
         run: |
           cd lambda
-          zip -r function.zip lambda_function.py
+          zip -r function.zip wistia_ingestion_function.py
           aws lambda update-function-code \
-            --function-name "$LAMBDA_FUNCTION_NAME" \
+            --function-name "$wistia_ingestion_function.pyE" \
             --zip-file fileb://function.zip
 
       - name: Upload Glue script to S3
