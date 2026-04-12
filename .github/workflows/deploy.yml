@@ -15,9 +15,9 @@ jobs:
       contents: read
 
     env:
-      AWS_REGION: us-east-2   # change if needed
+      AWS_REGION: us-east-2
       LAMBDA_FUNCTION_NAME: wistia-ingestion-function
-      GLUE_SCRIPT_S3_BUCKET: s3://aws-glue-assets-572318586627-us-east-2/scripts/
+      GLUE_SCRIPT_S3_BUCKET: aws-glue-assets-572318586627-us-east-2
 
     steps:
       - name: Checkout repo
@@ -37,10 +37,10 @@ jobs:
           cd lambda
           zip -r function.zip wistia-ingestion-function.py
           aws lambda update-function-code \
-            --function-name "$wistia-ingestion-function.pyE" \
+            --function-name "$LAMBDA_FUNCTION_NAME" \
             --zip-file fileb://function.zip
 
       - name: Upload Glue script to S3
         run: |
           aws s3 cp glue/wistia-raw-to-refined.py \
-            s3://$s3://aws-glue-assets-572318586627-us-east-2/scripts//scripts/wistia-raw-to-refined.py
+            s3://$GLUE_SCRIPT_S3_BUCKET/scripts/wistia-raw-to-refined.py
