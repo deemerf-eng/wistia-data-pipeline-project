@@ -1,0 +1,43 @@
+{
+  "name" : "wistia-raw-to-refined",
+  "jobMode" : "SCRIPT",
+  "description" : "",
+  "role" : "arn:aws:iam::572318586627:role/gluerole",
+  "executionProperty" : {
+    "maxConcurrentRuns" : 1
+  },
+  "command" : {
+    "name" : "glueetl",
+    "scriptLocation" : "s3://aws-glue-assets-572318586627-us-east-2/scripts/wistia-raw-to-refined.py",
+    "pythonVersion" : "3"
+  },
+  "defaultArguments" : {
+    "--enable-glue-datacatalog" : "true",
+    "--job-bookmark-option" : "job-bookmark-disable",
+    "--S3_BUCKET" : "wistia-dea-project-bucket",
+    "--TempDir" : "s3://aws-glue-assets-572318586627-us-east-2/temporary/",
+    "--REFINED_PREFIX" : "refined",
+    "--enable-metrics" : "true",
+    "--enable-spark-ui" : "true",
+    "--spark-event-logs-path" : "s3://aws-glue-assets-572318586627-us-east-2/sparkHistoryLogs/",
+    "--enable-job-insights" : "true",
+    "--enable-observability-metrics" : "true",
+    "--conf" : "spark.eventLog.rolling.enabled=true",
+    "--RAW_PREFIX" : "raw",
+    "--job-language" : "python"
+  },
+  "maxRetries" : 0,
+  "allocatedCapacity" : 2,
+  "timeout" : 12,
+  "maxCapacity" : 2.0,
+  "glueVersion" : "5.1",
+  "numberOfWorkers" : 2,
+  "workerType" : "G.1X",
+  "executionClass" : "STANDARD",
+  "sourceControlDetails" : {
+    "provider" : "GITHUB",
+    "repository" : "wistia-data-pipeline-project",
+    "branch" : "main",
+    "folder" : "glue"
+  }
+}
