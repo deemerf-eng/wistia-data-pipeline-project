@@ -40,7 +40,6 @@ jobs:
             --function-name "$LAMBDA_FUNCTION_NAME" \
             --zip-file fileb://function.zip
 
-      - name: Upload Glue script to S3
+      - name: Upload all Glue script to S3
         run: |
-          aws s3 cp glue/wistia-raw-to-refined.py \
-            s3://$GLUE_SCRIPT_S3_BUCKET/scripts/wistia-raw-to-refined.py
+          aws s3 sync glue/ s3://$GLUE_SCRIPT_S3_BUCKET/scripts/
