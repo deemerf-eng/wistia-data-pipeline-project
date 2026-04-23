@@ -18,53 +18,32 @@ spark = glueContext.spark_session
 job = Job(glueContext)
 job.init(args["JOB_NAME"], args)
 
-# =========================
-# Paths
-# =========================
 refined_base = f"s3://{S3_BUCKET}/refined"
 curated_base = f"s3://{S3_BUCKET}/curated"
 
-print("S3_BUCKET =", S3_BUCKET)
-print("refined_base =", refined_base)
-print("curated_base =", curated_base)
-
-# =========================
-# Load Data
-# =========================
 inventory = spark.read.parquet(f"{refined_base}/media_inventory/")
 stats = spark.read.parquet(f"{refined_base}/media_stats/")
 engagement = spark.read.parquet(f"{refined_base}/media_engagement/")
 
-print("inventory count =", inventory.count())
-print("stats count =", stats.count())
-print("engagement count =", engagement.count())
+engagement_avg = (
+    engagement
+    .groupBy("media_id")
+    .agg(F.avg("engagement").alias("avg_engagement"))
+)
 
-print("inventory columns =", inventory.columns)
-print("stats columns =", stats.columns)
-print("engagement columns =", engagement.columns)
-
-# =========================
-# 1. MEDIA PERFORMANCE TABLE
-# =========================
 media_perf = (
     stats
     .join(inventory, "media_id", "left")
-    .join(
-        engagement.groupBy("media_id")
-        .agg(F.avg("engagement").alias("avg_engagement")),
-        "media_id",
-        "left"
+    .join(engagement_avg, "media_id", "left")
+    .withColumn(
+        "avg_watch_time",
+        F.when(F.col("play_count") > 0, F.col("hours_watched") / F.col("play_count"))
+         .otherwise(F.lit(0))
     )
-    .withColumn("avg_watch_time", F.col("hours_watched") / (F.col("play_count") + 1))
 )
-
-print("media_perf count =", media_perf.count())
 
 media_perf.write.mode("overwrite").parquet(f"{curated_base}/media_performance/")
 
-# =========================
-# 2. ENGAGEMENT SUMMARY
-# =========================
 engagement_summary = (
     engagement
     .groupBy("media_id")
@@ -73,8 +52,6 @@ engagement_summary = (
         F.max("engagement_value").alias("max_engagement")
     )
 )
-
-print("engagement_summary count =", engagement_summary.count())
 
 engagement_summary.write.mode("overwrite").parquet(
     f"{curated_base}/engagement_summary/"
