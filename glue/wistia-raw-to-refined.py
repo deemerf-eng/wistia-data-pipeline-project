@@ -6,7 +6,7 @@ from awsglue.job import Job
 from pyspark.sql import functions as F
 
 # =========================
-# Arguments (THIS FIXES YOUR ERROR)
+# Arguments
 # =========================
 args = getResolvedOptions(
     sys.argv,
@@ -43,16 +43,20 @@ inventory_df = (
     .withColumn("folder_name", F.col("folder.name"))
     .select(
         "media_id",
+        "id",
         "name",
         "duration",
         "created",
         "updated",
+        "type",
+        "archived",
+        "status",
+        "progress",
         "folder_name"
     )
 )
 
 inventory_df.write.mode("overwrite").parquet(f"{refined_base}/media_inventory/")
-
 
 # =========================
 # 2. MEDIA STATS BY DATE
@@ -63,7 +67,7 @@ stats_df = (
     stats
     .withColumn(
         "media_id",
-        F.regexp_extract(F.input_file_name(), "media_id=([^/]+)", 1)
+        F.regexp_extract(F.input_file_name(), r"media_id=([^.]+)\.json", 1)
     )
     .select(
         "media_id",
@@ -76,7 +80,6 @@ stats_df = (
 
 stats_df.write.mode("overwrite").parquet(f"{refined_base}/media_stats/")
 
-
 # =========================
 # 3. MEDIA ENGAGEMENT
 # =========================
@@ -86,7 +89,7 @@ engagement_df = (
     engagement
     .withColumn(
         "media_id",
-        F.regexp_extract(F.input_file_name(), "media_id=([^/]+)", 1)
+        F.regexp_extract(F.input_file_name(), r"media_id=([^.]+)\.json", 1)
     )
 )
 
@@ -114,7 +117,5 @@ engagement_exploded = (
 engagement_exploded.write.mode("overwrite").parquet(
     f"{refined_base}/media_engagement/"
 )
-# =========================
-# Finish
-# =========================
+
 job.commit()
