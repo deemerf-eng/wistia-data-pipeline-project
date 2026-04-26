@@ -56,5 +56,22 @@ engagement_summary = (
 engagement_summary.write.mode("overwrite").parquet(
     f"{curated_base}/engagement_summary/"
 )
+# =========================
+# 3. MEDIA RETENTION (NEW)
+# =========================
+retention = spark.read.parquet(f"{refined_base}/media_engagement/")
 
+retention_df = (
+    retention
+    .select(
+        "media_id",
+        "position_index",
+        "engagement_value",
+        "rewatch_value"
+    )
+)
+
+retention_df.write.mode("overwrite").parquet(
+    f"{curated_base}/media_retention/"
+)
 job.commit()
