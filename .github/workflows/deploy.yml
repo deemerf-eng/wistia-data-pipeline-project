@@ -35,7 +35,7 @@ jobs:
       - name: Deploy Lambda
         run: |
           cd lambda
-          zip -r function.zip wistia-ingestion-function.py
+          zip -r function.zip wistia_ingestion_function.py
           aws lambda update-function-code \
             --function-name "$LAMBDA_FUNCTION_NAME" \
             --zip-file fileb://function.zip
