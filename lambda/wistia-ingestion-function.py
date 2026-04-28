@@ -27,6 +27,8 @@ s3 = boto3.client("s3")
 secrets_client = boto3.client("secretsmanager")
 dynamodb = boto3.resource("dynamodb")
 table = dynamodb.Table(DDB_TABLE_NAME)
+glue = boto3.client("glue")
+GLUE_WORKFLOW_NAME = os.environ["GLUE_WORKFLOW_NAME"]
 
 # =========================
 # Logging
@@ -195,6 +197,12 @@ def lambda_handler(event, context):
     # only update watermark if no hard failures
     if failed == 0:
         update_pipeline_state(end_date)
+
+    if failed == 0:
+        glue.start_workflow_run(Name=GLUE_WORKFLOW_NAME)
+        logger.info(f"Started Glue workflow: {GLUE_WORKFLOW_NAME}")
+    else:
+        logger.warning("Glue workflow not started because ingestion had failures.")
 
     return {
         "statusCode": 200 if failed == 0 else 207,
